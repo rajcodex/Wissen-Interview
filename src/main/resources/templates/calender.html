@@ -1,207 +1,150 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Three Month Calendar</title>
     <style>
-        .holiday {
-            background-color: #ffd1d1;
-            color: red;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .work-holiday {
-            background-color: #d1ffd1;
-            color: green;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .light-green-row td {
-            background-color: #e6ffe6 !important;
-        }
-
-        .deep-green-row td {
-            background-color: #99ff99 !important;
-        }
-
-        .date-cell:hover {
-            background-color: #f0f0f0;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            text-align: center;
-        }
-
-        td, th {
-            width: 30px;
-            height: 30px;
-            padding: 4px;
-        }
-
-        #calendarHeader {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-        }
-
-        h2 {
-            text-align: center;
-            width: 100%;
-        }
+		td.today {
+		    background-color: #cce5ff;
+		    color: #004085;
+		    font-weight: bold;
+		    border: 2px solid #3399ff;
+		}
+		
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             padding: 20px;
+            text-align: center;
+            background: #fafafa;
         }
-
+        #controls {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+        select, button {
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+        button:hover, select:hover {
+            border-color: #888;
+        }
         .calendar-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 20px;
         }
-
         .month-box {
+            background: #fff;
             border: 1px solid #ccc;
             border-radius: 10px;
-            padding: 10px;
-            width: 250px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            padding: 12px;
+            width: 280px;
+            box-shadow: 1px 1px 5px #ccc;
         }
-
         .month-title {
             font-weight: bold;
-            margin-bottom: 10px;
             font-size: 18px;
+            margin-bottom: 8px;
+            text-align: center;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
+            user-select: none;
         }
-
         th {
-            background-color: #f2f2f2;
-            padding: 5px;
+            background-color: #f0f0f0;
+            padding: 6px;
+            border: 1px solid #ddd;
         }
-
         td {
-            padding: 5px;
             height: 30px;
             text-align: center;
+            border: 1px solid #ddd;
+            cursor: default;
+            position: relative;
+            border-radius: 4px;
+            transition: background-color 0.25s;
         }
-
-        td:hover {
+        td.holiday {
+            color: #b00000;
+            font-weight: bold;
+            background-color: #ffdada;
+        }
+        td.work-holiday {
+            color: #006400;
+            font-weight: bold;
+            background-color: #d6f5d6;
+        }
+        td.date-cell:hover:not(.holiday):not(.work-holiday) {
+            background-color: #e6f0ff;
             cursor: pointer;
-            background-color: #e6f7ff; /* light blue background on hover */
-            border-radius: 5px;
+            border-radius: 6px;
         }
-
-        .buttons {
-            margin-top: 20px;
+        tr.light-green-row {
+            background-color: #e8f5e9;
         }
-
-        button {
-            padding: 10px 15px;
-            margin: 0 10px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 1px solid #aaa;
-            cursor: pointer;
+        tr.deep-green-row {
+            background-color: #a5d6a7;
+        }
+     
+        td[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 3px 7px;
+            font-size: 12px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
 
-<div style="display: flex; justify-content: space-between; align-items: center;">
-    <h1>Vacation Calendar</h1>
-    <div>
-        <label for="countrySelect">Select Country:</label>
-        <select id="countrySelect" onchange="onCountryChange()">
-            <option value="">--Select--</option>
-            <option value="US">United States</option>
-            <option value="IN">India</option>
-            <option value="GB">United Kingdom</option>
-            <option value="CA">Canada</option>
-            <option value="AU">Australia</option>
-            <option value="FR">France</option>
-            <option value="DE">Germany</option>
-            <option value="JP">Japan</option>
-            <option value="BR">Brazil</option>
-            <option value="ZA">South Africa</option>
-        </select>
-    </div>
-</div>
-
-<div class="calendar-container" id="calendarContainer">
-    <!-- Months will be injected here -->
-</div>
-
-<div id="calendarHeader">
+<div id="controls">
+    <label for="countrySelect">Select Country:</label>
+    <select id="countrySelect"></select>
     <button onclick="prevMonths()">Prev</button>
     <button onclick="nextMonths()">Next</button>
+    <button id="toggleRowsBtn" onclick="toggleEmptyRows()">Hide Rows Without Holidays</button>
 </div>
 
-<div class="buttons" style="margin-top: 30px;">
-    <button id="toggleRowsBtn" onclick="toggleNonHolidayRows()">Toggle Hide Non-Holiday Rows</button>
-</div>
+<div class="calendar-container" id="calendarContainer"></div>
 
 <script>
-    let currentDate = new Date();
-    let rowsHidden = false; // toggle flag
+    const countries = [
+        { code: 'IN', name: 'India' },
+        { code: 'US', name: 'United States' },
+        { code: 'GB', name: 'United Kingdom' },
+        { code: 'CA', name: 'Canada' },
+        { code: 'AU', name: 'Australia' },
+        { code: 'FR', name: 'France' },
+        { code: 'DE', name: 'Germany' },
+        { code: 'JP', name: 'Japan' },
+        { code: 'NL', name: 'Netherlands' },
+        { code: 'BR', name: 'Brazil' },
+        { code: 'ZA', name: 'South Africa' }
+    ];
 
-    const indiaHolidays = {
-        "1-1": "New Year's Day",
-        "1-14": "Makar Sankranti",
-        "1-26": "Republic Day",
-        "2-14": "Vasant Panchami",
-        "3-8": "Maha Shivratri",
-        "3-25": "Holi",
-        "3-29": "Good Friday",
-        "4-10": "Ram Navami",
-        "4-14": "Ambedkar Jayanti",
-        "4-21": "Mahavir Jayanti",
-        "5-1": "Labour Day",
-        "5-23": "Buddha Purnima",
-        "6-17": "Bakrid / Eid al-Adha",
-        "7-17": "Muharram",
-        "8-15": "Independence Day",
-        "8-26": "Janmashtami",
-        "9-5": "Teachers' Day",
-        "9-17": "Vishwakarma Puja",
-        "10-2": "Gandhi Jayanti",
-        "10-11": "Maha Ashtami",
-        "10-12": "Maha Navami",
-        "10-13": "Dussehra",
-        "10-31": "Halloween",
-        "11-1": "Kannada Rajyotsava",
-        "11-2": "All Souls' Day",
-        "11-7": "Diwali",
-        "11-8": "Govardhan Puja",
-        "11-9": "Bhai Dooj",
-        "12-24": "Christmas Eve",
-        "12-25": "Christmas",
-        "12-31": "New Year's Eve"
-    };
-
-    // Added several clustered work holidays in March to trigger deep-green row color
+    // Example hardcoded work holidays (same for all countries for demo)
     const workHolidays = {
         "1-3": "Company Offsite",
         "2-10": "Quarterly Planning",
         "2-20": "Team Building",
         "3-15": "Internal Training",
-        "3-16": "Client Meeting",
-        "3-17": "Project Review",
-        "3-18": "Hackathon Day",
-        "3-19": "Team Outing",
         "4-5": "Strategy Day",
         "4-28": "HR Workshop",
         "5-12": "Innovation Day",
@@ -216,9 +159,48 @@
         "12-2": "Wellness Day"
     };
 
+    let currentDate = new Date();
+    let holidaysData = {}; 
+    let hideEmptyRows = false;
+
+    const calendarContainer = document.getElementById('calendarContainer');
+    const countrySelect = document.getElementById('countrySelect');
+    const toggleBtn = document.getElementById('toggleRowsBtn');
+
+    function populateCountryDropdown() {
+        countries.forEach(c => {
+            let option = document.createElement('option');
+            option.value = c.code;
+            option.textContent = c.name;
+            countrySelect.appendChild(option);
+        });
+        countrySelect.value = 'IN'; 
+    }
+
+    async function fetchHolidays(country, year) {
+        try {
+            const response = await fetch(`/api/holidays?country=${country}&year=${year}`);
+            if (!response.ok) throw new Error('Failed to fetch holidays');
+            const data = await response.json();
+
+            // Extract holiday dates in "month-day" format
+            let holidays = {};
+            if (data && data.holidays) {
+                data.holidays.forEach(h => {
+                    let d = new Date(h.date.iso);
+                    let key = (d.getMonth() + 1) + '-' + d.getDate();
+                    holidays[key] = h.name;
+                });
+            }
+            return holidays;
+        } catch (err) {
+            alert('Error fetching holidays: ' + err.message);
+            return {};
+        }
+    }
+
     function renderCalendar() {
-        const container = document.getElementById("calendarContainer");
-        container.innerHTML = "";
+        calendarContainer.innerHTML = '';
 
         let startMonth = currentDate.getMonth();
         let startYear = currentDate.getFullYear();
@@ -226,11 +208,12 @@
         for (let i = 0; i < 3; i++) {
             let month = (startMonth + i) % 12;
             let year = startYear + Math.floor((startMonth + i) / 12);
-            container.appendChild(createMonthCalendar(year, month));
+            calendarContainer.appendChild(createMonthCalendar(year, month));
         }
-        // Reset toggle on re-render
-        rowsHidden = false;
-        document.getElementById("toggleRowsBtn").textContent = "Toggle Hide Non-Holiday Rows";
+
+        if (hideEmptyRows) {
+            hideRowsWithoutHolidays();
+        }
     }
 
     function createMonthCalendar(year, monthIndex) {
@@ -239,29 +222,29 @@
         const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
 
         const monthDiv = document.createElement("div");
-        monthDiv.classList.add("month");
-        monthDiv.style.display = "inline-block";
-        monthDiv.style.margin = "10px";
-        monthDiv.style.verticalAlign = "top";
+        monthDiv.classList.add("month-box");
 
-        const header = document.createElement("h3");
+        const header = document.createElement("div");
+        header.classList.add("month-title");
         header.textContent = `${monthNames[monthIndex]} ${year}`;
-        header.style.textAlign = "center";
         monthDiv.appendChild(header);
 
         const table = document.createElement("table");
 
+        // header row
         const thead = document.createElement("thead");
         const trHead = document.createElement("tr");
-        for (const day of dayNames) {
+        dayNames.forEach(d => {
             const th = document.createElement("th");
-            th.textContent = day;
+            th.textContent = d;
             trHead.appendChild(th);
-        }
+        });
         thead.appendChild(trHead);
         table.appendChild(thead);
 
+        // body rows
         const tbody = document.createElement("tbody");
+
         const firstDay = new Date(year, monthIndex, 1).getDay();
         const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
@@ -269,6 +252,7 @@
         for (let i = 0; i < 6; i++) {
             const tr = document.createElement("tr");
             let workHolidayCount = 0;
+            let hasHolidayInRow = false;
 
             for (let j = 0; j < 7; j++) {
                 const td = document.createElement("td");
@@ -277,15 +261,22 @@
                 } else if (date > daysInMonth) {
                     td.textContent = "";
                 } else {
-                    td.textContent = date;
+					td.textContent = date;
+					const today = new Date();
+					if (date === today.getDate() && monthIndex === today.getMonth() && year === today.getFullYear()) {
+					    td.classList.add("today");
+					}
+
                     const key = `${monthIndex + 1}-${date}`;
 
-                    if (indiaHolidays[key]) {
+                    if (holidaysData[key]) {
                         td.classList.add("holiday");
-                        td.title = indiaHolidays[key];
+                        td.title = holidaysData[key];
+                        hasHolidayInRow = true;
                     } else if (workHolidays[key]) {
                         td.classList.add("work-holiday");
                         td.title = workHolidays[key];
+                        hasHolidayInRow = true;
                         workHolidayCount++;
                     } else {
                         td.classList.add("date-cell");
@@ -295,14 +286,16 @@
                 tr.appendChild(td);
             }
 
-            if (workHolidayCount > 3) {
-                tr.classList.add("deep-green-row");
-            } else if (workHolidayCount >= 1) {
-                tr.classList.add("light-green-row");
-            }
-
+            tr.setAttribute("data-has-holiday", hasHolidayInRow ? "true" : "false");
             tbody.appendChild(tr);
-            if (date > daysInMonth) break;
+
+            if (hasHolidayInRow) {
+                if (workHolidayCount >=3) {
+                    tr.classList.add("deep-green-row");
+                } else if (workHolidayCount >=1) {
+                    tr.classList.add("light-green-row");
+                }
+            }
         }
 
         table.appendChild(tbody);
@@ -310,42 +303,61 @@
         return monthDiv;
     }
 
+    function hideRowsWithoutHolidays() {
+        const rows = document.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+            if (row.getAttribute("data-has-holiday") === "false") {
+                row.style.display = "none";
+            }
+        });
+        toggleBtn.textContent = "Show Rows Without Holidays";
+        hideEmptyRows = true;
+    }
+
+    function showAllRows() {
+        const rows = document.querySelectorAll("tbody tr");
+        rows.forEach(row => {
+            row.style.display = "";
+        });
+        toggleBtn.textContent = "Hide Rows Without Holidays";
+        hideEmptyRows = false;
+    }
+
+    function toggleEmptyRows() {
+        if (hideEmptyRows) {
+            showAllRows();
+        } else {
+            hideRowsWithoutHolidays();
+        }
+    }
+
     function prevMonths() {
         currentDate.setMonth(currentDate.getMonth() - 3);
-        renderCalendar();
+        loadAndRender();
     }
 
     function nextMonths() {
         currentDate.setMonth(currentDate.getMonth() + 3);
+        loadAndRender();
+    }
+
+    async function loadAndRender() {
+        const selectedCountry = countrySelect.value;
+        const year = currentDate.getFullYear();
+
+        holidaysData = await fetchHolidays(selectedCountry, year);
         renderCalendar();
     }
 
-    function toggleNonHolidayRows() {
-        const container = document.getElementById("calendarContainer");
-        const monthDivs = container.querySelectorAll(".month");
-        rowsHidden = !rowsHidden;
+    countrySelect.addEventListener("change", () => {
+        // Reset to first month of the year when country changes
+        currentDate = new Date(currentDate.getFullYear(), 0, 1);
+        loadAndRender();
+    });
 
-        monthDivs.forEach(monthDiv => {
-            const rows = monthDiv.querySelectorAll("tbody tr");
-            rows.forEach(row => {
-                const hasHoliday = [...row.cells].some(cell =>
-                    cell.classList.contains("holiday") || cell.classList.contains("work-holiday")
-                );
-                if (!hasHoliday) {
-                    row.style.display = rowsHidden ? "none" : "";
-                }
-            });
-        });
-
-        // Update button text
-        document.getElementById("toggleRowsBtn").textContent = rowsHidden ? "Show All Rows" : "Toggle Hide Non-Holiday Rows";
-    }
-
-    document.addEventListener("DOMContentLoaded", renderCalendar);
-
-    function onCountryChange() {
-        renderCalendar();
-    }
+    // Initialize
+    populateCountryDropdown();
+    loadAndRender();
 </script>
 
 </body>

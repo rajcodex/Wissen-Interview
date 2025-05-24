@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,23 +22,36 @@ public class DemoController {
     }
     
     
+    private static final String CALENDARIFIC_URL =
+            "https://calendarific.com/api/v2/holidays";
+    private String apiKey="rTggNmYKh3WCkDrWvw9QAb6WuejIUCY5";
+    
     @GetMapping("/api/holidays")
-    public List<Map<String, Object>> getHolidays(
+    public ResponseEntity<?> getHolidays(
             @RequestParam String country,
-            @RequestParam int year) throws RestClientException {
+            @RequestParam int year) {
 
-        String url = String.format("https://date.nager.at/api/v3/PublicHolidays/%d/%s", year, country);
+        RestTemplate restTemplate = new RestTemplate();
 
-        // Nager.Date returns a JSON array of holidays, map to List<Map>
-        List<Map<String, Object>> holidays = null;
-		try {
-			holidays = restTemplate.getForObject(url, List.class);
-		} catch (RestClientException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        String url = CALENDARIFIC_URL +
+                "?api_key=" + apiKey +
+                "&country=" + country +
+                "&year=" + year;
 
-        return holidays;
+        // Call Calendarific API
+        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
-}
+        // Return the "response" node from Calendarific's JSON
+        // (which contains holidays list and metadata)
+        if(response.getStatusCode().is2xxSuccessful()) {
+            Map<String, Object> body = response.getBody();
+            if(body != null && body.containsKey("response")) {
+                return ResponseEntity.ok(body.get("response"));
+            } else {
+                return ResponseEntity.status(500).body("Invalid API response");
+            }
+        } else {
+            return ResponseEntity.status(response.getStatusCode()).body("Failed to fetch holidays");
+        }
+    }
 }
